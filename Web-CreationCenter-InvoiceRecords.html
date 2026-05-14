@@ -1,0 +1,1822 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>发票记录 - 创作中心</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#6366F1',
+                        secondary: '#10B981',
+                        accent: '#F59E0B',
+                        danger: '#EF4444',
+                        dark: '#1E293B',
+                        light: '#F8FAFC'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .transition-all-300 {
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .sidebar-active {
+                background: linear-gradient(90deg, rgba(99, 102, 241, 0.15) 0%, rgba(99, 102, 241, 0.05) 100%);
+                border-left: 3px solid #6366F1;
+                color: #6366F1;
+                font-weight: 600;
+            }
+            .sidebar-item {
+                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                position: relative;
+            }
+            .sidebar-item::before {
+                content: '';
+                position: absolute;
+                left: 12px;
+                top: 50%;
+                transform: translateY(-50%) scale(0);
+                width: 6px;
+                height: 6px;
+                background: #6366F1;
+                border-radius: 50%;
+                transition: transform 0.2s ease;
+            }
+            .sidebar-item:hover::before {
+                transform: translateY(-50%) scale(1);
+            }
+            .sidebar-item:hover {
+                background-color: rgba(99, 102, 241, 0.08);
+                transform: translateX(2px);
+            }
+            .sidebar-icon {
+                transition: transform 0.2s ease, color 0.2s ease;
+            }
+            .sidebar-item:hover .sidebar-icon {
+                transform: scale(1.1);
+            }
+            .nav-section-title {
+                position: relative;
+                display: inline-block;
+            }
+            .nav-section-title::after {
+                content: '';
+                position: absolute;
+                bottom: -2px;
+                left: 0;
+                width: 0;
+                height: 2px;
+                background: linear-gradient(90deg, #6366F1, transparent);
+                transition: width 0.3s ease;
+            }
+            .nav-group:hover .nav-section-title::after {
+                width: 100%;
+            }
+            .publish-btn {
+                background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 50%, #A855F7 100%);
+                box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .publish-btn:hover {
+                box-shadow: 0 6px 25px rgba(99, 102, 241, 0.5);
+                transform: translateY(-2px) scale(1.02);
+            }
+            .publish-btn:active {
+                transform: translateY(0) scale(0.98);
+            }
+            .scrollbar-thin::-webkit-scrollbar {
+                width: 6px;
+                height: 6px;
+            }
+            .scrollbar-thin::-webkit-scrollbar-track {
+                background: #f1f1f1;
+                border-radius: 3px;
+            }
+            .scrollbar-thin::-webkit-scrollbar-thumb {
+                background: #c1c1c1;
+                border-radius: 3px;
+            }
+            .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+                background: #a8a8a8;
+            }
+        }
+    </style>
+</head>
+<body class="bg-light text-dark min-h-screen flex flex-col">
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fa fa-pencil-square-o text-primary text-3xl"></i>
+                <h1 class="text-2xl font-bold text-primary">创作中心</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="relative">
+                    <button class="p-2 rounded-full hover:bg-gray-100 transition-all-300">
+                        <i class="fa fa-bell-o text-gray-600"></i>
+                        <span class="absolute top-1 right-1 w-2 h-2 bg-danger rounded-full"></span>
+                    </button>
+                </div>
+                <div class="relative group">
+                    <button class="flex items-center space-x-2">
+                        <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20business%20owner%20avatar%20modern%20style&image_size=square" alt="商家头像" class="w-8 h-8 rounded-full object-cover">
+                        <span class="font-medium">商家名称</span>
+                        <i class="fa fa-caret-down text-gray-600"></i>
+                    </button>
+                    <div class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
+                        <a href="#" class="block px-4 py-2 hover:bg-gray-100 transition-colors">
+                            <i class="fa fa-user mr-2"></i>店铺设置
+                        </a>
+                        <a href="#" class="block px-4 py-2 hover:bg-gray-100 transition-colors">
+                            <i class="fa fa-cog mr-2"></i>账户设置
+                        </a>
+                        <div class="border-t border-gray-100 my-1"></div>
+                        <a href="#" class="block px-4 py-2 hover:bg-gray-100 transition-colors text-danger">
+                            <i class="fa fa-sign-out mr-2"></i>退出登录
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex flex-1">
+        <aside class="w-64 bg-white shadow-[0_0_20px_rgba(0,0,0,0.05)] h-[calc(100vh-64px)] sticky top-16 overflow-y-auto scrollbar-thin">
+            <nav class="py-5">
+                <div class="px-5 mb-7">
+                    <button class="publish-btn w-full flex items-center justify-center gap-2 px-5 py-3.5 text-white rounded-xl font-semibold tracking-wide">
+                        <i class="fa fa-plus text-lg"></i>
+                        <span>发布</span>
+                    </button>
+                </div>
+                
+                <div class="px-5 mb-2">
+                    <a href="#" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:text-primary transition-all-300">
+                        <i class="fa fa-home sidebar-icon text-lg w-6 text-center"></i>
+                        <span class="text-sm font-medium">首页</span>
+                    </a>
+                </div>
+                
+                <div class="nav-group mt-6">
+                    <div class="px-5 mb-3">
+                        <h2 class="nav-section-title text-xs font-bold text-gray-400 uppercase tracking-widest leading-relaxed">发布管理</h2>
+                    </div>
+                    <div class="px-5 space-y-1">
+                        <a href="#" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:text-primary transition-all-300">
+                            <i class="fa fa-file-text-o sidebar-icon text-lg w-6 text-center text-gray-400 hover:text-primary"></i>
+                            <span class="text-sm font-medium">文章管理</span>
+                        </a>
+                        <a href="#" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:text-primary transition-all-300">
+                            <i class="fa fa-play-circle-o sidebar-icon text-lg w-6 text-center text-gray-400 hover:text-primary"></i>
+                            <span class="text-sm font-medium">课程管理</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="nav-group mt-6">
+                    <div class="px-5 mb-3">
+                        <h2 class="nav-section-title text-xs font-bold text-gray-400 uppercase tracking-widest leading-relaxed">交易管理</h2>
+                    </div>
+                    <div class="px-5 space-y-1">
+                        <a href="#" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:text-primary transition-all-300">
+                            <i class="fa fa-list-ul sidebar-icon text-lg w-6 text-center text-gray-400 hover:text-primary"></i>
+                            <span class="text-sm font-medium">订单记录</span>
+                        </a>
+                        <a href="#invoice" class="sidebar-item sidebar-active flex items-center gap-3 px-4 py-3 rounded-xl transition-all-300">
+                            <i class="fa fa-file-text sidebar-icon text-lg w-6 text-center"></i>
+                            <span class="text-sm font-medium">发票记录</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="nav-group mt-6">
+                    <div class="px-5 mb-3">
+                        <h2 class="nav-section-title text-xs font-bold text-gray-400 uppercase tracking-widest leading-relaxed">数据统计</h2>
+                    </div>
+                    <div class="px-5 space-y-1">
+                        <a href="#" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:text-primary transition-all-300">
+                            <i class="fa fa-bar-chart sidebar-icon text-lg w-6 text-center text-gray-400 hover:text-primary"></i>
+                            <span class="text-sm font-medium">文章统计</span>
+                        </a>
+                        <a href="#" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:text-primary transition-all-300">
+                            <i class="fa fa-signal sidebar-icon text-lg w-6 text-center text-gray-400 hover:text-primary"></i>
+                            <span class="text-sm font-medium">课程统计</span>
+                        </a>
+                        <a href="#" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:text-primary transition-all-300">
+                            <i class="fa fa-line-chart sidebar-icon text-lg w-6 text-center text-gray-400 hover:text-primary"></i>
+                            <span class="text-sm font-medium">收益统计</span>
+                        </a>
+                    </div>
+                </div>
+            </nav>
+        </aside>
+
+        <div class="flex-1 p-6 overflow-y-auto">
+            <div id="invoice">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold">发票记录</h2>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                    <div class="p-4 border-b">
+                        <div class="flex flex-wrap items-center gap-4">
+                            <div class="flex space-x-2">
+                                <button class="tab-btn px-4 py-2 text-sm font-medium border-b-2 border-primary text-primary" data-tab="pending">待开票</button>
+                                <button class="tab-btn px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 relative" data-tab="change">待换开
+                                    <span class="absolute -top-1 -right-1 w-4 h-4 bg-accent text-white text-xs rounded-full flex items-center justify-center tab-badge">3</span>
+                                </button>
+                                <button class="tab-btn px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800" data-tab="invoiced">已开票</button>
+                                <button class="tab-btn px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800" data-tab="changed">已换开</button>
+                                <button class="tab-btn px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800" data-tab="red">已冲红</button>
+                            </div>
+                            <div class="flex-1"></div>
+                            <div class="flex items-center space-x-3">
+                                <input type="text" id="searchInput" placeholder="搜索申请单号/订单号" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 w-72">
+                                <select id="statusFilter" class="hidden px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50">
+                                    <option value="">全部状态</option>
+                                    <option value="pending">待处理</option>
+                                    <option value="rejected">已驳回</option>
+                                </select>
+                                <input type="date" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50">
+                                <span class="text-gray-400">~</span>
+                                <input type="date" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50">
+                                <button class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium">
+                                    <i class="fa fa-search mr-1"></i>查询
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="pendingTab" class="tab-content">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="bg-gray-50">
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">申请单号</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">关联订单</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">用户信息</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">发票信息</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">发票金额</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">申请时间</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">状态</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b hover:bg-gray-50">
+                                    <td class="px-4 py-3 text-sm text-primary font-medium">APP20260507001</td>
+                                    <td class="px-4 py-3">
+                                        <div class="flex items-center">
+                                            <span class="text-sm text-gray-700">1 个订单</span>
+                                            <button class="ml-2 text-primary hover:text-primary/80 text-sm toggle-orders" onclick="toggleOrders('PENDING_001')">
+                                                <i class="fa fa-chevron-down mr-1"></i>查看
+                                            </button>
+                                        </div>
+                                        <div class="order-list hidden mt-2 p-2 bg-gray-50 rounded-lg" id="orders_PENDING_001">
+                                            <p class="text-xs text-gray-500 mb-1">DD202605070001</p>
+                                            <p class="text-xs text-gray-400">订单金额: ¥299.00</p>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <p class="text-sm text-gray-700">用户昵称</p>
+
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <p class="text-sm text-gray-700">增值税普通发票</p>
+                                        <p class="text-sm text-gray-500">个人抬头</p>
+                                    </td>
+                                    <td class="px-4 py-3 text-sm font-medium text-gray-800">¥299.00</td>
+                                    <td class="px-4 py-3 text-sm text-gray-500">2026-05-07 10:30:00</td>
+                                    <td class="px-4 py-3">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                                            <i class="fa fa-clock-o mr-1"></i>待开票
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <button class="text-primary hover:text-primary/80 text-sm mr-2" onclick="openUploadModal('APP20260507001')">
+                                            <i class="fa fa-upload mr-1"></i>上传发票
+                                        </button>
+                                        <button class="text-gray-500 hover:text-danger text-sm" onclick="openRejectModal('APP20260507001', 'pending')">
+                                            <i class="fa fa-times mr-1"></i>驳回
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr class="border-b hover:bg-gray-50">
+                                    <td class="px-4 py-3 text-sm text-primary font-medium">APP20260507002</td>
+                                    <td class="px-4 py-3">
+                                        <div class="flex items-center">
+                                            <span class="text-sm text-gray-700">2 个订单</span>
+                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 ml-2">
+                                                <i class="fa fa-undo mr-0.5"></i>退款中
+                                            </span>
+                                            <button class="ml-2 text-primary hover:text-primary/80 text-sm toggle-orders" onclick="toggleOrders('PENDING_002')">
+                                                <i class="fa fa-chevron-down mr-1"></i>查看
+                                            </button>
+                                        </div>
+                                        <div class="order-list hidden mt-2 p-3 bg-gray-50 rounded-lg" id="orders_PENDING_002">
+                                            <div class="flex justify-between items-center text-xs">
+                                                <span class="text-gray-500">DD202605070012</span>
+                                                <span class="text-gray-600">¥399.00</span>
+                                            </div>
+                                            <div class="flex justify-between items-center text-xs mt-2">
+                                                <span class="text-gray-500">DD202605070013</span>
+                                                <span class="flex items-center">
+                                                    <span class="text-gray-600">¥200.00</span>
+                                                    <span class="inline-flex items-center px-1 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 ml-2">
+                                                        <i class="fa fa-undo mr-0.5"></i>退款中
+                                                    </span>
+                                                </span>
+                                            </div>
+                                            <div class="flex justify-between items-center pt-2 border-t border-gray-200 text-xs mt-2">
+                                                <span class="text-gray-400">合计</span>
+                                                <span class="font-medium text-gray-800">¥599.00</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <p class="text-sm text-gray-700">王五</p>
+
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <p class="text-sm text-gray-700">增值税专用发票</p>
+                                        <p class="text-sm text-gray-500">深圳市XX科技有限公司</p>
+                                    </td>
+                                    <td class="px-4 py-3 text-sm font-medium text-gray-800">¥599.00</td>
+                                    <td class="px-4 py-3 text-sm text-gray-500">2026-05-07 09:15:00</td>
+                                    <td class="px-4 py-3">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                                            <i class="fa fa-clock-o mr-1"></i>待开票
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <span class="text-xs text-gray-400">订单退款中</span>
+                                    </td>
+                                </tr>
+                                <tr class="border-b hover:bg-gray-50 bg-gray-50">
+                                    <td class="px-4 py-3 text-sm text-primary font-medium">APP20260506001</td>
+                                    <td class="px-4 py-3">
+                                        <div class="flex items-center">
+                                            <span class="text-sm text-gray-700">1 个订单</span>
+                                            <button class="ml-2 text-primary hover:text-primary/80 text-sm toggle-orders" onclick="toggleOrders('PENDING_REJECT_001')">
+                                                <i class="fa fa-chevron-down mr-1"></i>查看
+                                            </button>
+                                        </div>
+                                        <div class="order-list hidden mt-2 p-3 bg-gray-50 rounded-lg" id="orders_PENDING_REJECT_001">
+                                            <div class="flex justify-between items-center text-xs">
+                                                <span class="text-gray-500">DD202605060005</span>
+                                                <span class="text-gray-600">¥399.00</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <p class="text-sm text-gray-700">李七</p>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <p class="text-sm text-gray-700">增值税普通发票</p>
+                                        <p class="text-sm text-gray-500">企业用户</p>
+                                    </td>
+                                    <td class="px-4 py-3 text-sm font-medium text-gray-800">¥399.00</td>
+                                    <td class="px-4 py-3 text-sm text-gray-500">2026-05-06 16:45:00</td>
+                                    <td class="px-4 py-3">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
+                                            <i class="fa fa-times-circle mr-1"></i>已驳回
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <button class="text-gray-500 hover:text-primary text-sm" onclick="openRejectDetailModal('APP20260506001', 'pending', '发票抬头信息不完整，请补充完整的公司名称')">
+                                            <i class="fa fa-eye mr-1"></i>查看原因
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div id="changeTab" class="tab-content hidden">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="bg-gray-50">
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">申请单号</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">关联订单</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">用户信息</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">原发票信息</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">开票金额</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">申请换开</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">申请时间</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">状态</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b hover:bg-gray-50 bg-orange-50/50">
+                                    <td class="px-4 py-3 text-sm text-primary font-medium">APP20260507003</td>
+                                    <td class="px-4 py-3">
+                                        <div class="flex items-center">
+                                            <span class="text-sm text-gray-700">1 个订单</span>
+                                            <button class="ml-2 text-primary hover:text-primary/80 text-sm toggle-orders" onclick="toggleOrders('CHANGE_001')">
+                                                <i class="fa fa-chevron-down mr-1"></i>查看
+                                            </button>
+                                        </div>
+                                        <div class="order-list hidden mt-2 p-2 bg-gray-50 rounded-lg" id="orders_CHANGE_001">
+                                            <p class="text-xs text-gray-500 mb-1">DD202605070008</p>
+                                            <p class="text-xs text-gray-400">订单金额: ¥599.00</p>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <p class="text-sm text-gray-700">张三</p>
+
+                                    </td>
+                                    <td class="px-4 py-3 cursor-pointer hover:text-primary transition-colors" onclick="openOriginalInvoicePreview('INV20260507001')">
+                                        <p class="text-sm text-gray-500">增值税普通发票 / 个人抬头</p>
+                                        <p class="text-xs text-gray-400 mt-1">发票号: INV20260507001</p>
+                                        <p class="text-xs text-primary mt-1 flex items-center">
+                                            <i class="fa fa-eye mr-1"></i>查看原发票
+                                        </p>
+                                    </td>
+                                    <td class="px-4 py-3 text-sm font-medium text-gray-800">¥599.00</td>
+                                    <td class="px-4 py-3">
+                                        <p class="text-sm text-gray-700">增值税专用发票</p>
+                                        <p class="text-xs text-gray-500 mt-1">深圳科技有限公司</p>
+                                    </td>
+                                    <td class="px-4 py-3 text-sm text-gray-500">2026-05-07 14:20:00</td>
+                                    <td class="px-4 py-3">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                                            <i class="fa fa-clock-o mr-1"></i>待换开
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <button class="text-accent hover:text-accent/80 text-sm mr-2" onclick="openViewChangeApply('APP20260507003')">
+                                            <i class="fa fa-edit mr-1"></i>换开
+                                        </button>
+                                        <button class="text-gray-500 hover:text-danger text-sm" onclick="openRejectModal('APP20260507003', 'change')">
+                                            <i class="fa fa-times mr-1"></i>驳回
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr class="border-b hover:bg-gray-50 bg-orange-50/50">
+                                    <td class="px-4 py-3 text-sm text-primary font-medium">APP20260507004</td>
+                                    <td class="px-4 py-3">
+                                        <div class="flex items-center">
+                                            <span class="text-sm text-gray-700">1 个订单</span>
+                                            <button class="ml-2 text-primary hover:text-primary/80 text-sm toggle-orders" onclick="toggleOrders('CHANGE_002')">
+                                                <i class="fa fa-chevron-down mr-1"></i>查看
+                                            </button>
+                                        </div>
+                                        <div class="order-list hidden mt-2 p-2 bg-gray-50 rounded-lg" id="orders_CHANGE_002">
+                                            <p class="text-xs text-gray-500 mb-1">DD202605070009</p>
+                                            <p class="text-xs text-gray-400">订单金额: ¥299.00</p>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <p class="text-sm text-gray-700">李四</p>
+
+                                    </td>
+                                    <td class="px-4 py-3 cursor-pointer hover:text-primary transition-colors" onclick="openOriginalInvoicePreview('INV20260507002')">
+                                        <p class="text-sm text-gray-500">增值税普通发票 / 北京贸易有限公司</p>
+                                        <p class="text-xs text-gray-400 mt-1">发票号: INV20260507002</p>
+                                        <p class="text-xs text-primary mt-1 flex items-center">
+                                            <i class="fa fa-eye mr-1"></i>查看原发票
+                                        </p>
+                                    </td>
+                                    <td class="px-4 py-3 text-sm font-medium text-gray-800">¥299.00</td>
+                                    <td class="px-4 py-3">
+                                        <p class="text-sm text-gray-700">增值税普通发票</p>
+                                        <p class="text-xs text-gray-500 mt-1">北京科技有限公司</p>
+                                    </td>
+                                    <td class="px-4 py-3 text-sm text-gray-500">2026-05-07 11:15:00</td>
+                                    <td class="px-4 py-3">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                                            <i class="fa fa-clock-o mr-1"></i>待换开
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <button class="text-accent hover:text-accent/80 text-sm mr-2" onclick="openViewChangeApply('APP20260507004')">
+                                            <i class="fa fa-edit mr-1"></i>换开
+                                        </button>
+                                        <button class="text-gray-500 hover:text-danger text-sm" onclick="openRejectModal('APP20260507004', 'change')">
+                                            <i class="fa fa-times mr-1"></i>驳回
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr class="border-b hover:bg-gray-50 bg-orange-50/50">
+                                    <td class="px-4 py-3 text-sm text-primary font-medium">APP20260507005</td>
+                                    <td class="px-4 py-3">
+                                        <div class="flex items-center">
+                                            <span class="text-sm text-gray-700">3 个订单</span>
+                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 ml-2">
+                                                <i class="fa fa-undo mr-0.5"></i>退款中
+                                            </span>
+                                            <button class="ml-2 text-primary hover:text-primary/80 text-sm toggle-orders" onclick="toggleOrders('CHANGE_003')">
+                                                <i class="fa fa-chevron-down mr-1"></i>查看
+                                            </button>
+                                        </div>
+                                        <div class="order-list hidden mt-2 p-3 bg-gray-50 rounded-lg" id="orders_CHANGE_003">
+                                            <div class="flex justify-between items-center text-xs">
+                                                <span class="text-gray-500">DD202605070013</span>
+                                                <span class="text-gray-600">¥399.00</span>
+                                            </div>
+                                            <div class="flex justify-between items-center text-xs mt-2">
+                                                <span class="text-gray-500">DD202605070014</span>
+                                                <span class="flex items-center">
+                                                    <span class="text-gray-600">¥599.00</span>
+                                                    <span class="inline-flex items-center px-1 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 ml-2">
+                                                        <i class="fa fa-undo mr-0.5"></i>退款中
+                                                    </span>
+                                                </span>
+                                            </div>
+                                            <div class="flex justify-between items-center text-xs mt-2">
+                                                <span class="text-gray-500">DD202605070015</span>
+                                                <span class="text-gray-600">¥290.00</span>
+                                            </div>
+                                            <div class="flex justify-between items-center pt-2 border-t border-gray-200 text-xs mt-2">
+                                                <span class="text-gray-400">合计</span>
+                                                <span class="font-medium text-gray-800">¥1,288.00</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <p class="text-sm text-gray-700">赵六</p>
+
+                                    </td>
+                                    <td class="px-4 py-3 cursor-pointer hover:text-primary transition-colors" onclick="openOriginalInvoicePreview('INV20260507003')">
+                                        <p class="text-sm text-gray-500">增值税专用发票 / 广州XX公司</p>
+                                        <p class="text-xs text-gray-400 mt-1">发票号: INV20260507003</p>
+                                        <p class="text-xs text-primary mt-1 flex items-center">
+                                            <i class="fa fa-eye mr-1"></i>查看原发票
+                                        </p>
+                                    </td>
+                                    <td class="px-4 py-3 text-sm font-medium text-gray-800">¥1,288.00</td>
+                                    <td class="px-4 py-3">
+                                        <p class="text-sm text-gray-700">增值税普通发票</p>
+                                        <p class="text-xs text-gray-500 mt-1">个人抬头</p>
+                                    </td>
+                                    <td class="px-4 py-3 text-sm text-gray-500">2026-05-07 08:30:00</td>
+                                    <td class="px-4 py-3">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                                            <i class="fa fa-clock-o mr-1"></i>待换开
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <span class="text-xs text-gray-400">订单退款中</span>
+                                    </td>
+                                </tr>
+                                <tr class="border-b hover:bg-gray-50 bg-gray-50">
+                                    <td class="px-4 py-3 text-sm text-primary font-medium">APP20260506002</td>
+                                    <td class="px-4 py-3">
+                                        <div class="flex items-center">
+                                            <span class="text-sm text-gray-700">1 个订单</span>
+                                            <button class="ml-2 text-primary hover:text-primary/80 text-sm toggle-orders" onclick="toggleOrders('CHANGE_REJECT_001')">
+                                                <i class="fa fa-chevron-down mr-1"></i>查看
+                                            </button>
+                                        </div>
+                                        <div class="order-list hidden mt-2 p-3 bg-gray-50 rounded-lg" id="orders_CHANGE_REJECT_001">
+                                            <div class="flex justify-between items-center text-xs">
+                                                <span class="text-gray-500">DD202605060007</span>
+                                                <span class="text-gray-600">¥599.00</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <p class="text-sm text-gray-700">王九</p>
+                                    </td>
+                                    <td class="px-4 py-3 cursor-pointer hover:text-primary transition-colors" onclick="openOriginalInvoicePreview('INV20260506002')">
+                                        <p class="text-sm text-gray-500">增值税普通发票 / 个人用户</p>
+                                        <p class="text-xs text-gray-400 mt-1">发票号: INV20260506002</p>
+                                        <p class="text-xs text-primary mt-1 flex items-center">
+                                            <i class="fa fa-eye mr-1"></i>查看原发票
+                                        </p>
+                                    </td>
+                                    <td class="px-4 py-3 text-sm font-medium text-gray-800">¥599.00</td>
+                                    <td class="px-4 py-3">
+                                        <p class="text-sm text-gray-700">增值税专用发票</p>
+                                        <p class="text-xs text-gray-500 mt-1">北京科技公司</p>
+                                    </td>
+                                    <td class="px-4 py-3 text-sm text-gray-500">2026-05-06 11:30:00</td>
+                                    <td class="px-4 py-3">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
+                                            <i class="fa fa-times-circle mr-1"></i>已驳回
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <button class="text-gray-500 hover:text-primary text-sm" onclick="openRejectDetailModal('APP20260506002', 'change', '纳税人识别号有误，请提供正确的税号信息')">
+                                            <i class="fa fa-eye mr-1"></i>查看原因
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div id="invoicedTab" class="tab-content hidden">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="bg-gray-50">
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">申请单号</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">发票信息</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">关联订单</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">用户信息</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">开票金额</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">开票时间</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b hover:bg-gray-50">
+                                    <td class="px-4 py-3 text-sm text-primary font-medium">APP20260506001</td>
+                                    <td class="px-4 py-3 cursor-pointer hover:text-primary transition-colors" onclick="openInvoicePreviewWithTitle('发票预览 - INV20260506001')">
+                                        <p class="text-sm text-gray-700">增值税专用发票</p>
+                                        <p class="text-sm text-gray-500">北京科技有限公司</p>
+                                        <p class="text-xs text-gray-400 mt-1">发票号: INV20260506001</p>
+                                        <p class="text-xs text-primary mt-1 flex items-center">
+                                            <i class="fa fa-eye mr-1"></i>查看发票
+                                        </p>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <div class="flex items-center">
+                                            <span class="text-sm text-gray-700">1 个订单</span>
+                                            <button class="ml-2 text-primary hover:text-primary/80 text-sm toggle-orders" onclick="toggleOrders('INVOICED_01')">
+                                                <i class="fa fa-chevron-down mr-1"></i>查看
+                                            </button>
+                                        </div>
+                                        <div class="order-list hidden mt-2 p-2 bg-gray-50 rounded-lg" id="orders_INVOICED_01">
+                                            <p class="text-xs text-gray-500 mb-1">DD202605060002</p>
+                                            <p class="text-xs text-gray-400">订单金额: ¥199.00</p>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <p class="text-sm text-gray-700">企业用户</p>
+
+                                    </td>
+                                    <td class="px-4 py-3 text-sm font-medium text-gray-800">¥199.00</td>
+                                    <td class="px-4 py-3 text-sm text-gray-500">2026-05-06 15:20:00</td>
+                                    <td class="px-4 py-3">
+                                        <button class="text-danger hover:text-danger/80 text-sm" onclick="openRedModal('APP20260506001')">
+                                            <i class="fa fa-times-circle mr-1"></i>冲红
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr class="border-b hover:bg-gray-50">
+                                    <td class="px-4 py-3 text-sm text-primary font-medium">APP20260505001</td>
+                                    <td class="px-4 py-3 cursor-pointer hover:text-primary transition-colors" onclick="openInvoicePreviewWithTitle('发票预览 - INV20260505001')">
+                                        <p class="text-sm text-gray-700">增值税普通发票</p>
+                                        <p class="text-sm text-gray-500">上海贸易有限公司</p>
+                                        <p class="text-xs text-gray-400 mt-1">发票号: INV20260505001</p>
+                                        <p class="text-xs text-primary mt-1 flex items-center">
+                                            <i class="fa fa-eye mr-1"></i>查看发票
+                                        </p>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <div class="flex items-center">
+                                            <span class="text-sm text-gray-700">5 个订单</span>
+                                            <button class="ml-2 text-primary hover:text-primary/80 text-sm toggle-orders" onclick="toggleOrders('INVOICED_02')">
+                                                <i class="fa fa-chevron-down mr-1"></i>查看
+                                            </button>
+                                        </div>
+                                        <div class="order-list hidden mt-2 p-3 bg-gray-50 rounded-lg" id="orders_INVOICED_02">
+                                            <div class="space-y-2">
+                                                <div class="flex justify-between items-center">
+                                                    <span class="text-xs text-gray-500">DD202605050003</span>
+                                                    <span class="text-xs text-gray-600">¥299.00</span>
+                                                </div>
+                                                <div class="flex justify-between items-center">
+                                                    <span class="text-xs text-gray-500">DD202605050004</span>
+                                                    <span class="text-xs text-gray-600">¥599.00</span>
+                                                </div>
+                                                <div class="flex justify-between items-center">
+                                                    <span class="text-xs text-gray-500">DD202605050005</span>
+                                                    <span class="text-xs text-gray-600">¥699.00</span>
+                                                </div>
+                                                <div class="flex justify-between items-center">
+                                                    <span class="text-xs text-gray-500">DD202605050006</span>
+                                                    <span class="text-xs text-gray-600">¥499.00</span>
+                                                </div>
+                                                <div class="flex justify-between items-center">
+                                                    <span class="text-xs text-gray-500">DD202605050007</span>
+                                                    <span class="text-xs text-gray-600">¥584.00</span>
+                                                </div>
+                                                <div class="flex justify-between items-center pt-2 border-t border-gray-200">
+                                                    <span class="text-xs text-gray-400">合计</span>
+                                                    <span class="text-xs font-medium text-gray-800">¥2,680.00</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <p class="text-sm text-gray-700">VIP用户</p>
+
+                                    </td>
+                                    <td class="px-4 py-3 text-sm font-medium text-gray-800">¥2,680.00</td>
+                                    <td class="px-4 py-3 text-sm text-gray-500">2026-05-05 09:15:00</td>
+                                    <td class="px-4 py-3">
+                                        <button class="text-danger hover:text-danger/80 text-sm" onclick="openRedModal('APP20260505001')">
+                                            <i class="fa fa-times-circle mr-1"></i>冲红
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr class="border-b hover:bg-gray-50">
+                                    <td class="px-4 py-3 text-sm text-primary font-medium">APP20260503001</td>
+                                    <td class="px-4 py-3 cursor-pointer hover:text-primary transition-colors" onclick="openInvoicePreviewWithTitle('发票预览 - INV20260503001')">
+                                        <p class="text-sm text-gray-700">增值税专用发票</p>
+                                        <p class="text-sm text-gray-500">广州实业有限公司</p>
+                                        <p class="text-xs text-gray-400 mt-1">发票号: INV20260503001</p>
+                                        <p class="text-xs text-primary mt-1 flex items-center">
+                                            <i class="fa fa-eye mr-1"></i>查看发票
+                                        </p>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <div class="flex items-center">
+                                            <span class="text-sm text-gray-700">2 个订单</span>
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 ml-2">
+                                                <i class="fa fa-undo mr-1"></i>退款中
+                                            </span>
+                                            <button class="ml-2 text-primary hover:text-primary/80 text-sm toggle-orders" onclick="toggleOrders('INVOICED_03')">
+                                                <i class="fa fa-chevron-down mr-1"></i>查看
+                                            </button>
+                                        </div>
+                                        <div class="order-list hidden mt-2 p-3 bg-gray-50 rounded-lg" id="orders_INVOICED_03">
+                                            <div class="space-y-2">
+                                                <div class="flex justify-between items-center">
+                                                    <span class="text-xs text-gray-500">DD202605030005</span>
+                                                    <span class="text-xs text-gray-600">¥299.00</span>
+                                                </div>
+                                                <div class="flex justify-between items-center">
+                                                    <div class="flex items-center">
+                                                        <span class="text-xs text-gray-500">DD202605030006</span>
+                                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 ml-2">
+                                                            <i class="fa fa-undo mr-0.5"></i>退款中
+                                                        </span>
+                                                    </div>
+                                                    <span class="text-xs text-gray-600">¥300.00</span>
+                                                </div>
+                                                <div class="flex justify-between items-center pt-2 border-t border-gray-200">
+                                                    <span class="text-xs text-gray-400">合计</span>
+                                                    <span class="text-xs font-medium text-gray-800">¥599.00</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <p class="text-sm text-gray-700">企业用户</p>
+
+                                    </td>
+                                    <td class="px-4 py-3 text-sm font-medium text-gray-800">¥599.00</td>
+                                    <td class="px-4 py-3 text-sm text-gray-500">2026-05-03 11:30:00</td>
+                                    <td class="px-4 py-3">
+                                        <button class="text-danger hover:text-danger/80 text-sm" onclick="openRefundRedModal('INV20260503001')">
+                                            <i class="fa fa-undo mr-1"></i>退款冲红
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div id="changedTab" class="tab-content hidden">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="bg-gray-50">
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">申请单号</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">新发票信息</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">原发票信息</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">关联订单</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">用户信息</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">开票金额</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">换开时间</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b hover:bg-gray-50">
+                                    <td class="px-4 py-3 text-sm text-primary font-medium">APP20260506002</td>
+                                    <td class="px-4 py-3 cursor-pointer hover:text-primary transition-colors" onclick="openInvoicePreviewWithTitle('新发票预览 - INV20260506002')">
+                                        <p class="text-sm text-gray-700">增值税专用发票</p>
+                                        <p class="text-sm text-gray-500">深圳科技有限公司</p>
+                                        <p class="text-xs text-gray-400 mt-1">新发票号: INV20260506002</p>
+                                        <p class="text-xs text-primary mt-1 flex items-center">
+                                            <i class="fa fa-eye mr-1"></i>查看新发票
+                                        </p>
+                                    </td>
+                                    <td class="px-4 py-3 cursor-pointer hover:text-primary transition-colors" onclick="openInvoicePreviewWithTitle('原发票预览 - INV20260506001')">
+                                        <p class="text-sm text-gray-500">增值税普通发票</p>
+                                        <p class="text-xs text-gray-400">原发票抬头: 个人抬头</p>
+                                        <p class="text-xs text-gray-400">原发票号: INV20260506001</p>
+                                        <p class="text-xs text-primary mt-1 flex items-center">
+                                            <i class="fa fa-eye mr-1"></i>查看原发票
+                                        </p>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <div class="flex items-center">
+                                            <span class="text-sm text-gray-700">1 个订单</span>
+                                            <button class="ml-2 text-primary hover:text-primary/80 text-sm toggle-orders" onclick="toggleOrders('CHANGED_01')">
+                                                <i class="fa fa-chevron-down mr-1"></i>查看
+                                            </button>
+                                        </div>
+                                        <div class="order-list hidden mt-2 p-2 bg-gray-50 rounded-lg" id="orders_CHANGED_01">
+                                            <p class="text-xs text-gray-500 mb-1">DD202605060003</p>
+                                            <p class="text-xs text-gray-400">订单金额: ¥399.00</p>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <p class="text-sm text-gray-700">周七</p>
+
+                                    </td>
+                                    <td class="px-4 py-3 text-sm font-medium text-gray-800">¥399.00</td>
+                                    <td class="px-4 py-3 text-sm text-gray-500">2026-05-06 16:30:00</td>
+                                    <td class="px-4 py-3">
+                                        <button class="text-danger hover:text-danger/80 text-sm" onclick="openRedModal('INV20260506002')">
+                                            <i class="fa fa-times-circle mr-1"></i>冲红
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr class="border-b hover:bg-gray-50">
+                                    <td class="px-4 py-3 text-sm text-primary font-medium">APP20260505002</td>
+                                    <td class="px-4 py-3 cursor-pointer hover:text-primary transition-colors" onclick="openInvoicePreviewWithTitle('新发票预览 - INV20260505003')">
+                                        <p class="text-sm text-gray-700">增值税专用发票</p>
+                                        <p class="text-sm text-gray-500">杭州YY集团</p>
+                                        <p class="text-xs text-gray-400 mt-1">新发票号: INV20260505003</p>
+                                        <p class="text-xs text-primary mt-1 flex items-center">
+                                            <i class="fa fa-eye mr-1"></i>查看新发票
+                                        </p>
+                                    </td>
+                                    <td class="px-4 py-3 cursor-pointer hover:text-primary transition-colors" onclick="openInvoicePreviewWithTitle('原发票预览 - INV20260505002')">
+                                        <p class="text-sm text-gray-500">增值税普通发票</p>
+                                        <p class="text-xs text-gray-400">原发票抬头: 杭州YY集团(原)</p>
+                                        <p class="text-xs text-gray-400">原发票号: INV20260505002</p>
+                                        <p class="text-xs text-primary mt-1 flex items-center">
+                                            <i class="fa fa-eye mr-1"></i>查看原发票
+                                        </p>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <div class="flex items-center">
+                                            <span class="text-sm text-gray-700">2 个订单</span>
+                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 ml-2">
+                                                <i class="fa fa-undo mr-0.5"></i>退款中
+                                            </span>
+                                            <button class="ml-2 text-primary hover:text-primary/80 text-sm toggle-orders" onclick="toggleOrders('CHANGED_02')">
+                                                <i class="fa fa-chevron-down mr-1"></i>查看
+                                            </button>
+                                        </div>
+                                        <div class="order-list hidden mt-2 p-3 bg-gray-50 rounded-lg" id="orders_CHANGED_02">
+                                            <div class="flex justify-between items-center text-xs">
+                                                <span class="text-gray-500">DD202605050008</span>
+                                                <span class="text-gray-600">¥688.00</span>
+                                            </div>
+                                            <div class="flex justify-between items-center text-xs mt-2">
+                                                <span class="text-gray-500">DD202605050009</span>
+                                                <span class="flex items-center">
+                                                    <span class="text-gray-600">¥600.00</span>
+                                                    <span class="inline-flex items-center px-1 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 ml-2">
+                                                        <i class="fa fa-undo mr-0.5"></i>退款中
+                                                    </span>
+                                                </span>
+                                            </div>
+                                            <div class="flex justify-between items-center pt-2 border-t border-gray-200 text-xs mt-2">
+                                                <span class="text-gray-400">合计</span>
+                                                <span class="font-medium text-gray-800">¥1,288.00</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <p class="text-sm text-gray-700">陈八</p>
+
+                                    </td>
+                                    <td class="px-4 py-3 text-sm font-medium text-gray-800">¥1,288.00</td>
+                                    <td class="px-4 py-3 text-sm text-gray-500">2026-05-05 14:20:00</td>
+                                    <td class="px-4 py-3">
+                                        <button class="text-danger hover:text-danger/80 text-sm" onclick="openRefundRedModal('INV20260505003')">
+                                            <i class="fa fa-undo mr-1"></i>退款冲红
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div id="redTab" class="tab-content hidden">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="bg-gray-50">
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">申请单号</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">原发票信息</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">关联订单</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">用户信息</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">开票金额</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">冲红原因</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">冲红时间</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b hover:bg-gray-50">
+                                    <td class="px-4 py-3 text-sm text-primary font-medium">APP20260504001</td>
+                                    <td class="px-4 py-3 cursor-pointer hover:text-primary transition-colors" onclick="openInvoicePreviewWithTitle('原发票预览 - INV20260504001')">
+                                        <p class="text-sm text-gray-700">增值税普通发票</p>
+                                        <p class="text-sm text-gray-500">个人抬头</p>
+                                        <p class="text-xs text-gray-400 mt-1">发票号: INV20260504001</p>
+                                        <p class="text-xs text-primary mt-1 flex items-center">
+                                            <i class="fa fa-eye mr-1"></i>查看原发票
+                                        </p>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <div class="flex items-center">
+                                            <span class="text-sm text-gray-700">1 个订单</span>
+                                            <button class="ml-2 text-primary hover:text-primary/80 text-sm toggle-orders" onclick="toggleOrders('RED_01')">
+                                                <i class="fa fa-chevron-down mr-1"></i>查看
+                                            </button>
+                                        </div>
+                                        <div class="order-list hidden mt-2 p-2 bg-gray-50 rounded-lg" id="orders_RED_01">
+                                            <p class="text-xs text-gray-500 mb-1">DD202605040004</p>
+                                            <p class="text-xs text-gray-400">订单金额: ¥399.00</p>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <p class="text-sm text-gray-700">普通用户</p>
+
+                                    </td>
+                                    <td class="px-4 py-3 text-sm font-medium text-gray-800">¥399.00</td>
+                                    <td class="px-4 py-3">
+                                        <button class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-orange-100 text-orange-800 hover:bg-orange-200 transition-colors" onclick="openRedDetailModal('manual')">
+                                            <i class="fa fa-edit mr-1"></i>手动冲红
+                                        </button>
+                                    </td>
+                                    <td class="px-4 py-3 text-sm text-gray-500">2026-05-04 14:45:00</td>
+                                    <td class="px-4 py-3">
+                                        <button class="text-primary hover:text-primary/80 text-sm" onclick="openInvoicePreviewWithTitle('红字发票预览 - RED-INV20260504001')">
+                                            <i class="fa fa-eye mr-1"></i>查看红字发票
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr class="border-b hover:bg-gray-50">
+                                    <td class="px-4 py-3 text-sm text-primary font-medium">APP20260502001</td>
+                                    <td class="px-4 py-3 cursor-pointer hover:text-primary transition-colors" onclick="openInvoicePreviewWithTitle('原发票预览 - INV20260505003')">
+                                        <p class="text-sm text-gray-700">增值税专用发票</p>
+                                        <p class="text-sm text-gray-500">杭州YY集团</p>
+                                        <p class="text-xs text-gray-400 mt-1">发票号: INV20260505003</p>
+                                        <p class="text-xs text-primary mt-1 flex items-center">
+                                            <i class="fa fa-eye mr-1"></i>查看原发票
+                                        </p>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <div class="flex items-center">
+                                            <span class="text-sm text-gray-700">2 个订单</span>
+                                            <button class="ml-2 text-primary hover:text-primary/80 text-sm toggle-orders" onclick="toggleOrders('RED_02')">
+                                                <i class="fa fa-chevron-down mr-1"></i>查看
+                                            </button>
+                                        </div>
+                                        <div class="order-list hidden mt-2 p-2 bg-gray-50 rounded-lg" id="orders_RED_02">
+                                            <p class="text-xs text-gray-500 mb-1">DD202605020001, DD202605020002</p>
+                                            <p class="text-xs text-gray-400">冲红金额: ¥1,288.00</p>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <p class="text-sm text-gray-700">刘九</p>
+
+                                    </td>
+                                    <td class="px-4 py-3 text-sm font-medium text-gray-800">¥1,288.00</td>
+                                    <td class="px-4 py-3">
+                                        <button class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors" onclick="openRedDetailModal('refund')">
+                                            <i class="fa fa-undo mr-1"></i>退款冲红
+                                        </button>
+                                    </td>
+                                    <td class="px-4 py-3 text-sm text-gray-500">2026-05-02 10:20:00</td>
+                                    <td class="px-4 py-3">
+                                        <button class="text-primary hover:text-primary/80 text-sm" onclick="openInvoicePreviewWithTitle('红字发票预览 - RED-INV20260505003')">
+                                            <i class="fa fa-eye mr-1"></i>查看红字发票
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="p-4 border-t flex items-center justify-between">
+                        <span class="text-sm text-gray-600">共 5 条记录</span>
+                        <div class="flex items-center space-x-2">
+                            <button class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                <i class="fa fa-chevron-left text-gray-600"></i>
+                            </button>
+                            <button class="px-3 py-1 bg-primary text-white rounded hover:bg-primary/90">1</button>
+                            <button class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50" disabled>
+                                <i class="fa fa-chevron-right text-gray-600"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="uploadModal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+        <div class="absolute inset-0 bg-black/50" onclick="closeModal('uploadModal')"></div>
+        <div class="relative bg-white rounded-xl shadow-xl w-full max-w-2xl mx-4 transform transition-all">
+            <div class="flex items-center justify-between p-4 border-b">
+                <h3 class="text-lg font-semibold">上传发票</h3>
+                <button class="p-2 hover:bg-gray-100 rounded-full transition-colors" onclick="closeModal('uploadModal')">
+                    <i class="fa fa-times text-gray-600"></i>
+                </button>
+            </div>
+            <div class="p-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-700 mb-3">申请开票信息</h4>
+                        <div class="space-y-4">
+                            <div>
+                                <span class="block text-xs text-gray-500 mb-1">发票类型</span>
+                                <span class="text-sm text-gray-700">增值税普通发票</span>
+                            </div>
+                            <div>
+                                <span class="block text-xs text-gray-500 mb-1">发票抬头</span>
+                                <span class="text-sm text-gray-700">个人抬头</span>
+                            </div>
+                            <div>
+                                <span class="block text-xs text-gray-500 mb-1">开票金额</span>
+                                <span class="text-sm font-medium text-gray-800">¥299.00</span>
+                            </div>
+                            <div>
+                                <span class="block text-xs text-gray-500 mb-1">纳税人识别号</span>
+                                <span class="text-sm text-gray-700">个人无需填写</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-700 mb-3">上传发票</h4>
+                        <div id="uploadSection">
+                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary transition-colors cursor-pointer" id="uploadArea">
+                                <i class="fa fa-upload text-4xl text-gray-400 mb-3"></i>
+                                <p class="text-gray-500 mb-1">点击或拖拽上传发票文件</p>
+                                <p class="text-sm text-gray-400">支持 PDF、图片格式，单个文件不超过 10MB</p>
+                            </div>
+                            <div id="uploadedFiles" class="mt-3 hidden">
+                                <div class="relative group cursor-pointer" onclick="openInvoicePreview()">
+                                    <div class="bg-gray-50 rounded-lg p-2 border border-gray-200 hover:border-primary transition-colors">
+                                        <img src="https://neeko-copilot.bytedance.net/api/text2image?prompt=invoice%20document%20preview%20thumbnail%20receipt%20paper&image_size=square" alt="发票预览" class="w-full h-32 object-contain rounded">
+                                        <div class="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/20 transition-colors rounded-lg">
+                                            <span class="opacity-0 group-hover:opacity-100 text-white text-sm font-medium transition-opacity">
+                                                <i class="fa fa-search-plus mr-1"></i>点击查看大图
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between mt-2">
+                                        <span class="text-sm text-gray-600">发票_202605070001.pdf</span>
+                                        <button class="text-gray-400 hover:text-danger transition-colors" onclick="event.stopPropagation(); removeFile()">
+                                            <i class="fa fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex space-x-3 mt-6">
+                    <button class="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm font-medium" onclick="closeModal('uploadModal')">取消</button>
+                    <button class="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium" onclick="submitInvoice()">确认上传</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="changeModal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+        <div class="absolute inset-0 bg-black/50" onclick="closeModal('changeModal')"></div>
+        <div class="relative bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 transform transition-all">
+            <div class="flex items-center justify-between p-4 border-b">
+                <h3 class="text-lg font-semibold">发票换开</h3>
+                <button class="p-2 hover:bg-gray-100 rounded-full transition-colors" onclick="closeModal('changeModal')">
+                    <i class="fa fa-times text-gray-600"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                    <i class="fa fa-info-circle text-yellow-600 mr-2"></i>
+                    <span class="text-sm text-yellow-800">换开后原发票将失效，请确保新发票信息准确无误</span>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">原发票号码</label>
+                        <input type="text" value="FP202605060001" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" readonly>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">发票类型</label>
+                        <select class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50">
+                            <option>增值税普通发票</option>
+                            <option>增值税专用发票</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">发票抬头</label>
+                        <input type="text" value="北京科技有限公司" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">新发票附件</label>
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary transition-colors cursor-pointer">
+                            <i class="fa fa-upload text-4xl text-gray-400 mb-3"></i>
+                            <p class="text-gray-500 mb-1">点击或拖拽上传新发票文件</p>
+                            <p class="text-sm text-gray-400">支持 PDF、图片格式，单个文件不超过 10MB</p>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">新发票号码</label>
+                        <input type="text" placeholder="请输入新发票号码" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">换开原因</label>
+                        <textarea rows="3" placeholder="请输入换开原因" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"></textarea>
+                    </div>
+                </div>
+                <div class="flex space-x-3 mt-6">
+                    <button class="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm font-medium" onclick="closeModal('changeModal')">取消</button>
+                    <button class="flex-1 px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent/90 text-sm font-medium" onclick="submitChange()">确认换开</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="viewChangeApplyModal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+        <div class="absolute inset-0 bg-black/50" onclick="closeModal('viewChangeApplyModal')"></div>
+        <div class="relative bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 transform transition-all">
+            <div class="flex items-center justify-between p-4 border-b">
+                <h3 class="text-lg font-semibold">换开发票</h3>
+                <button class="p-2 hover:bg-gray-100 rounded-full transition-colors" onclick="closeModal('viewChangeApplyModal')">
+                    <i class="fa fa-times text-gray-600"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <div class="bg-accent/10 border border-accent/20 rounded-lg p-4 mb-4">
+                    <i class="fa fa-info-circle text-accent mr-2"></i>
+                    <span class="text-sm text-accent">用户申请更换发票信息，换开后原发票将失效，请确认新发票信息准确无误后再处理</span>
+                </div>
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">申请单号</label>
+                            <input type="text" value="APP20260507008" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" readonly>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">申请时间</label>
+                            <input type="text" value="2026-05-07 14:20:00" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" readonly>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-700 mb-3">原发票信息</h4>
+                        <div class="bg-gray-50 rounded-lg p-4 space-y-2">
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-500">发票类型</span>
+                                <span class="text-sm text-gray-700">增值税普通发票</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-500">发票抬头</span>
+                                <span class="text-sm text-gray-700">个人抬头</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-500">发票号码</span>
+                                <span class="text-sm text-gray-700">FP202605070001</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-500">开票金额</span>
+                                <span class="text-sm text-gray-700">¥599.00</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-700 mb-3">换开申请信息</h4>
+                        <div class="bg-accent/5 rounded-lg p-4 space-y-2">
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-500">新发票类型</span>
+                                <span class="text-sm text-accent font-medium">增值税专用发票</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-500">新发票抬头</span>
+                                <span class="text-sm text-accent font-medium">深圳科技有限公司</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-500">纳税人识别号</span>
+                                <span class="text-sm text-gray-700">91440300XXXXXXXXXX</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-500">地址电话</span>
+                                <span class="text-sm text-gray-700">深圳市南山区XXX路XXX号 0755-XXXXXXX</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-500">开户行及账号</span>
+                                <span class="text-sm text-gray-700">中国XX银行深圳分行 XXXXXXXXXXXXXX</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-700 mb-3">上传新发票</h4>
+                        <div id="changeUploadSection">
+                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-accent transition-colors cursor-pointer" id="changeUploadArea">
+                                <i class="fa fa-upload text-4xl text-gray-400 mb-3"></i>
+                                <p class="text-gray-500 mb-1">点击或拖拽上传新发票文件</p>
+                                <p class="text-sm text-gray-400">支持 PDF、图片格式，单个文件不超过 10MB</p>
+                            </div>
+                            <div id="changeUploadedFiles" class="mt-3 hidden">
+                                <div class="relative group cursor-pointer" onclick="openChangeInvoicePreview()">
+                                    <div class="bg-gray-50 rounded-lg p-2 border border-gray-200 hover:border-accent transition-colors">
+                                        <img src="https://neeko-copilot.bytedance.net/api/text2image?prompt=invoice%20document%20preview%20thumbnail%20receipt%20paper&image_size=square" alt="发票预览" class="w-full h-32 object-contain rounded">
+                                        <div class="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/20 transition-colors rounded-lg">
+                                            <span class="opacity-0 group-hover:opacity-100 text-white text-sm font-medium transition-opacity">
+                                                <i class="fa fa-search-plus mr-1"></i>点击查看大图
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between mt-2">
+                                        <span class="text-sm text-gray-600">发票_换开_202605070008.pdf</span>
+                                        <button class="text-gray-400 hover:text-danger transition-colors" onclick="event.stopPropagation(); removeChangeFile()">
+                                            <i class="fa fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex space-x-3 mt-4">
+                    <button class="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm font-medium" onclick="closeModal('viewChangeApplyModal')">取消</button>
+                    <button class="flex-1 px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent/90 text-sm font-medium" onclick="submitConfirmChange()">确认换开</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="redModal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+        <div class="absolute inset-0 bg-black/50" onclick="closeModal('redModal')"></div>
+        <div class="relative bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 transform transition-all">
+            <div class="flex items-center justify-between p-4 border-b">
+                <h3 class="text-lg font-semibold">发票冲红</h3>
+                <button class="p-2 hover:bg-gray-100 rounded-full transition-colors" onclick="closeModal('redModal')">
+                    <i class="fa fa-times text-gray-600"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                    <i class="fa fa-warning text-red-600 mr-2"></i>
+                    <span class="text-sm text-red-800">冲红后原发票将作废，请确保红字发票信息准确无误</span>
+                </div>
+                
+                <div class="space-y-6">
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-700 mb-3">待冲红发票信息</h4>
+                        <div class="bg-gray-50 rounded-lg p-4 space-y-2">
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-500">发票号码</span>
+                                <span class="text-sm text-gray-700">INV20260506002</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-500">发票类型</span>
+                                <span class="text-sm text-gray-700">增值税专用发票</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-500">发票抬头</span>
+                                <span class="text-sm text-gray-700">深圳科技有限公司</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-500">开票金额</span>
+                                <span class="text-sm font-medium text-gray-800">¥399.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-700 mb-3">上传红字发票</h4>
+                        <div class="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-4">
+                            <i class="fa fa-info-circle text-orange-600 mr-2"></i>
+                            <span class="text-xs text-orange-800">请将整张发票冲红，红字发票金额应与原发票金额一致</span>
+                        </div>
+                        <div id="redUploadSection">
+                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-danger transition-colors cursor-pointer" id="redUploadArea">
+                                <i class="fa fa-upload text-4xl text-gray-400 mb-3"></i>
+                                <p class="text-gray-500 mb-1">点击或拖拽上传红字发票文件</p>
+                                <p class="text-sm text-gray-400">支持 PDF、图片格式，单个文件不超过 10MB</p>
+                            </div>
+                            <div id="redUploadedFiles" class="mt-3 hidden">
+                                <div class="relative group cursor-pointer" onclick="openRedInvoicePreview()">
+                                    <div class="bg-gray-50 rounded-lg p-2 border border-gray-200 hover:border-danger transition-colors">
+                                        <img src="https://neeko-copilot.bytedance.net/api/text2image?prompt=red%20invoice%20document%20preview%20receipt%20paper%20Chinese%20VAT&image_size=square" alt="红字发票预览" class="w-full h-32 object-contain rounded">
+                                        <div class="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/20 transition-colors rounded-lg">
+                                            <span class="opacity-0 group-hover:opacity-100 text-white text-sm font-medium transition-opacity">
+                                                <i class="fa fa-search-plus mr-1"></i>点击查看大图
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between mt-2">
+                                        <span class="text-sm text-gray-600">红字发票_INV20260506001.pdf</span>
+                                        <button class="text-gray-400 hover:text-danger transition-colors" onclick="event.stopPropagation(); removeRedFile()">
+                                            <i class="fa fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">冲红说明</label>
+                        <textarea rows="3" placeholder="请输入冲红说明" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"></textarea>
+                    </div>
+                </div>
+
+                <div class="flex space-x-3 mt-6">
+                    <button class="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm font-medium" onclick="closeModal('redModal')">取消</button>
+                    <button class="flex-1 px-4 py-2 bg-danger text-white rounded-lg hover:bg-danger/90 text-sm font-medium" onclick="submitRed()">确认冲红</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="refundRedModal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+        <div class="absolute inset-0 bg-black/50" onclick="closeModal('refundRedModal')"></div>
+        <div class="relative bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 transform transition-all">
+            <div class="flex items-center justify-between p-4 border-b">
+                <h3 class="text-lg font-semibold">退款冲红</h3>
+                <button class="p-2 hover:bg-gray-100 rounded-full transition-colors" onclick="closeModal('refundRedModal')">
+                    <i class="fa fa-times text-gray-600"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                    <i class="fa fa-warning text-red-600 mr-2"></i>
+                    <span class="text-sm text-red-800">该订单正在退款中，冲红后将完成退款流程</span>
+                </div>
+                
+                <div class="space-y-6">
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-700 mb-3">退款信息</h4>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs text-gray-500">退款订单</span>
+                                <span class="text-sm text-gray-700">DD202605030006</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs text-gray-500">退款金额</span>
+                                <span class="text-sm font-medium text-red-600">¥300.00</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs text-gray-500">退款原因</span>
+                                <span class="text-sm text-gray-700">商品质量问题</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs text-gray-500">剩余金额</span>
+                                <span class="text-sm text-gray-700">¥299.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-700 mb-3">待冲红发票信息</h4>
+                        <div class="bg-gray-50 rounded-lg p-4 space-y-2">
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-500">发票号码</span>
+                                <span class="text-sm text-gray-700">INV20260503001</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-500">发票类型</span>
+                                <span class="text-sm text-gray-700">增值税专用发票</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-500">发票抬头</span>
+                                <span class="text-sm text-gray-700">广州实业有限公司</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-500">开票金额</span>
+                                <span class="text-sm font-medium text-gray-800">¥599.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-700 mb-3">上传红字发票</h4>
+                        <div class="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-4">
+                            <i class="fa fa-info-circle text-orange-600 mr-2"></i>
+                            <span class="text-xs text-orange-800">请将整张发票冲红，红字发票金额应与原发票金额一致</span>
+                        </div>
+                        <div id="refundRedUploadSection">
+                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-danger transition-colors cursor-pointer" id="refundRedUploadArea">
+                                <i class="fa fa-upload text-4xl text-gray-400 mb-3"></i>
+                                <p class="text-gray-500 mb-1">点击或拖拽上传红字发票文件</p>
+                                <p class="text-sm text-gray-400">支持 PDF、图片格式，单个文件不超过 10MB</p>
+                            </div>
+                            <div id="refundRedUploadedFiles" class="mt-3 hidden">
+                                <div class="relative group cursor-pointer" onclick="openRefundRedInvoicePreview()">
+                                    <div class="bg-gray-50 rounded-lg p-2 border border-gray-200 hover:border-danger transition-colors">
+                                        <img src="https://neeko-copilot.bytedance.net/api/text2image?prompt=red%20invoice%20document%20preview%20receipt%20paper%20Chinese%20VAT&image_size=square" alt="红字发票预览" class="w-full h-32 object-contain rounded">
+                                        <div class="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/20 transition-colors rounded-lg">
+                                            <span class="opacity-0 group-hover:opacity-100 text-white text-sm font-medium transition-opacity">
+                                                <i class="fa fa-search-plus mr-1"></i>点击查看大图
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between mt-2">
+                                        <span class="text-sm text-gray-600">红字发票_INV20260503001.pdf</span>
+                                        <button class="text-gray-400 hover:text-danger transition-colors" onclick="event.stopPropagation(); removeRefundRedFile()">
+                                            <i class="fa fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                        <i class="fa fa-info-circle text-blue-600 mr-2"></i>
+                        <span class="text-xs text-blue-800">冲红后原发票作废，用户可根据剩余金额重新申请开票</span>
+                    </div>
+                </div>
+
+                <div class="flex space-x-3 mt-6">
+                    <button class="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm font-medium" onclick="closeModal('refundRedModal')">取消</button>
+                    <button class="flex-1 px-4 py-2 bg-danger text-white rounded-lg hover:bg-danger/90 text-sm font-medium" onclick="submitRefundRed()">确认退款冲红</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="redDetailModal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+        <div class="absolute inset-0 bg-black/50" onclick="closeModal('redDetailModal')"></div>
+        <div class="relative bg-white rounded-xl shadow-xl w-full max-w-md mx-4 transform transition-all">
+            <div class="flex items-center justify-between p-4 border-b">
+                <h3 class="text-lg font-semibold">冲红详情</h3>
+                <button class="p-2 hover:bg-gray-100 rounded-full transition-colors" onclick="closeModal('redDetailModal')">
+                    <i class="fa fa-times text-gray-600"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <div id="redDetailManual" class="space-y-4">
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="flex items-center mb-3">
+                            <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-orange-100 text-orange-800">
+                                <i class="fa fa-edit mr-1"></i>手动冲红
+                            </span>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-500">发票号码</span>
+                                <span class="text-gray-700">INV20260504001</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-500">冲红时间</span>
+                                <span class="text-gray-700">2026-05-04 14:45:00</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-700 mb-2">冲红说明</h4>
+                        <div class="bg-orange-50 border border-orange-200 rounded-lg p-3">
+                            <p class="text-sm text-orange-800">用户反馈发票抬头错误，需要重新开具正确的发票。</p>
+                        </div>
+                    </div>
+                </div>
+                <div id="redDetailRefund" class="space-y-4 hidden">
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="flex items-center mb-3">
+                            <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                <i class="fa fa-undo mr-1"></i>退款冲红
+                            </span>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-500">发票号码</span>
+                                <span class="text-gray-700">INV20260502001</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-500">退款订单</span>
+                                <span class="text-gray-700">DD202605020001</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-500">退款金额</span>
+                                <span class="text-red-600">¥500.00</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-500">冲红时间</span>
+                                <span class="text-gray-700">2026-05-02 10:20:00</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-700 mb-2">退款原因</h4>
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                            <p class="text-sm text-blue-800">商品存在质量问题，用户申请退货退款。</p>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-700 mb-2">冲红说明</h4>
+                        <div class="bg-red-50 border border-red-200 rounded-lg p-3">
+                            <p class="text-sm text-red-800">因订单退款，已将整张发票冲红，用户可根据剩余金额重新申请开票。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="px-6 py-4 border-t">
+                <button class="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium" onclick="closeModal('redDetailModal')">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openUploadModal(invoiceId) {
+            document.getElementById('uploadModal').classList.remove('hidden');
+        }
+
+        function openChangeModal(invoiceId) {
+            document.getElementById('changeModal').classList.remove('hidden');
+        }
+
+        function openRedModal(invoiceId) {
+            document.getElementById('redModal').classList.remove('hidden');
+        }
+
+        function openRefundRedModal(invoiceId) {
+            document.getElementById('refundRedModal').classList.remove('hidden');
+        }
+
+        function openRedDetailModal(type) {
+            document.getElementById('redDetailModal').classList.remove('hidden');
+            if (type === 'manual') {
+                document.getElementById('redDetailManual').classList.remove('hidden');
+                document.getElementById('redDetailRefund').classList.add('hidden');
+            } else {
+                document.getElementById('redDetailRefund').classList.remove('hidden');
+                document.getElementById('redDetailManual').classList.add('hidden');
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        function openViewChangeApply(invoiceId) {
+            document.getElementById('viewChangeApplyModal').classList.remove('hidden');
+        }
+
+        function toggleOrders(invoiceId) {
+            const orderList = document.getElementById('orders_' + invoiceId);
+            const btn = event.target.closest('.toggle-orders');
+            if (orderList.classList.contains('hidden')) {
+                orderList.classList.remove('hidden');
+                btn.innerHTML = '<i class="fa fa-chevron-up mr-1"></i>收起';
+            } else {
+                orderList.classList.add('hidden');
+                btn.innerHTML = '<i class="fa fa-chevron-down mr-1"></i>查看';
+            }
+        }
+
+        function submitConfirmChange() {
+            alert('发票换开成功！原发票已作废，新发票已上传。');
+            closeModal('confirmChangeModal');
+        }
+
+        function submitInvoice() {
+            alert('发票上传成功！');
+            closeModal('uploadModal');
+        }
+
+        function submitChange() {
+            alert('发票换开成功！');
+            closeModal('changeModal');
+        }
+
+        function submitRed() {
+            alert('发票冲红成功！');
+            closeModal('redModal');
+        }
+
+        function submitRefundRed() {
+            alert('退款冲红成功！');
+            closeModal('refundRedModal');
+        }
+
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.tab-btn').forEach(b => {
+                    b.classList.remove('border-b-2', 'border-primary', 'text-primary');
+                    b.classList.add('text-gray-600');
+                });
+                this.classList.add('border-b-2', 'border-primary', 'text-primary');
+                this.classList.remove('text-gray-600');
+
+                const tab = this.getAttribute('data-tab');
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.add('hidden');
+                });
+                document.getElementById(tab + 'Tab').classList.remove('hidden');
+
+                const searchInput = document.getElementById('searchInput');
+                const statusFilter = document.getElementById('statusFilter');
+                if (tab === 'pending' || tab === 'change') {
+                    searchInput.placeholder = '搜索申请单号/订单号';
+                    statusFilter.classList.remove('hidden');
+                } else {
+                    searchInput.placeholder = '搜索申请单号/订单号/发票号';
+                    statusFilter.classList.add('hidden');
+                }
+            });
+        });
+
+        document.getElementById('uploadArea').addEventListener('click', function() {
+            document.getElementById('uploadedFiles').classList.remove('hidden');
+            document.getElementById('uploadArea').classList.add('hidden');
+        });
+
+        function removeFile() {
+            document.getElementById('uploadedFiles').classList.add('hidden');
+            document.getElementById('uploadArea').classList.remove('hidden');
+        }
+
+        document.getElementById('changeUploadArea').addEventListener('click', function() {
+            document.getElementById('changeUploadedFiles').classList.remove('hidden');
+            document.getElementById('changeUploadArea').classList.add('hidden');
+        });
+
+        function removeChangeFile() {
+            document.getElementById('changeUploadedFiles').classList.add('hidden');
+            document.getElementById('changeUploadArea').classList.remove('hidden');
+        }
+
+        function openChangeInvoicePreview() {
+            document.getElementById('invoicePreviewTitle').textContent = '换开发票预览';
+            document.getElementById('invoicePreviewModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        document.getElementById('redUploadArea').addEventListener('click', function() {
+            document.getElementById('redUploadedFiles').classList.remove('hidden');
+            document.getElementById('redUploadArea').classList.add('hidden');
+        });
+
+        function removeRedFile() {
+            document.getElementById('redUploadedFiles').classList.add('hidden');
+            document.getElementById('redUploadArea').classList.remove('hidden');
+        }
+
+        function openRedInvoicePreview() {
+            document.getElementById('invoicePreviewTitle').textContent = '红字发票预览';
+            document.getElementById('invoicePreviewModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        document.getElementById('refundRedUploadArea').addEventListener('click', function() {
+            document.getElementById('refundRedUploadedFiles').classList.remove('hidden');
+            document.getElementById('refundRedUploadArea').classList.add('hidden');
+        });
+
+        function removeRefundRedFile() {
+            document.getElementById('refundRedUploadedFiles').classList.add('hidden');
+            document.getElementById('refundRedUploadArea').classList.remove('hidden');
+        }
+
+        function openRefundRedInvoicePreview() {
+            document.getElementById('invoicePreviewTitle').textContent = '退款红字发票预览';
+            document.getElementById('invoicePreviewModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function openRejectModal(applyId, type) {
+            document.getElementById('rejectModal').classList.remove('hidden');
+            document.getElementById('rejectApplyId').textContent = applyId;
+            document.getElementById('rejectType').value = type;
+        }
+
+        function closeRejectModal() {
+            document.getElementById('rejectModal').classList.add('hidden');
+            document.getElementById('rejectReason').value = '';
+        }
+
+        function submitReject() {
+            var reason = document.getElementById('rejectReason').value.trim();
+            if (!reason) {
+                alert('请填写驳回原因');
+                return;
+            }
+            var type = document.getElementById('rejectType').value;
+            var action = type === 'pending' ? '开票申请' : '换开申请';
+            alert(action + '已驳回，驳回原因：' + reason);
+            closeRejectModal();
+        }
+
+        function openInvoicePreview() {
+            document.getElementById('invoicePreviewTitle').textContent = '发票预览';
+            document.getElementById('invoicePreviewModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function openOriginalInvoicePreview(invoiceNo) {
+            document.getElementById('invoicePreviewTitle').textContent = '原发票预览 - ' + invoiceNo;
+            document.getElementById('invoicePreviewModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function openInvoicePreviewWithTitle(title) {
+            document.getElementById('invoicePreviewTitle').textContent = title;
+            document.getElementById('invoicePreviewModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeInvoicePreview() {
+            document.getElementById('invoicePreviewModal').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        function openRejectDetailModal(applyId, type, reason) {
+            document.getElementById('rejectDetailModal').classList.remove('hidden');
+            document.getElementById('rejectDetailApplyId').textContent = applyId;
+            document.getElementById('rejectDetailType').textContent = type === 'pending' ? '开票申请' : '换开申请';
+            document.getElementById('rejectDetailReason').textContent = reason;
+        }
+
+        function closeRejectDetailModal() {
+            document.getElementById('rejectDetailModal').classList.add('hidden');
+        }
+    </script>
+
+    <div id="rejectModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden">
+            <div class="flex items-center justify-between px-6 py-4 border-b">
+                <h3 class="text-lg font-semibold text-gray-800">驳回申请</h3>
+                <button onclick="closeRejectModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">申请单号</label>
+                    <span id="rejectApplyId" class="text-sm text-primary font-medium"></span>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">驳回原因 <span class="text-danger">*</span></label>
+                    <textarea id="rejectReason" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none resize-none" placeholder="请输入驳回原因"></textarea>
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button onclick="closeRejectModal()" class="px-4 py-2 text-sm text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                        取消
+                    </button>
+                    <button onclick="submitReject()" class="px-4 py-2 text-sm text-white bg-danger rounded-lg hover:bg-danger/90 transition-colors">
+                        确认驳回
+                    </button>
+                </div>
+            </div>
+        </div>
+        <input type="hidden" id="rejectType">
+    </div>
+
+    <div id="invoicePreviewModal" class="fixed inset-0 z-[100] flex items-center justify-center hidden">
+        <div class="absolute inset-0 bg-black/80" onclick="closeInvoicePreview()"></div>
+        <div class="relative max-w-4xl w-full mx-4">
+            <div class="flex items-center justify-between mb-4">
+                <h3 id="invoicePreviewTitle" class="text-lg font-semibold text-white">发票预览</h3>
+                <button class="p-2 hover:bg-white/10 rounded-full transition-colors" onclick="closeInvoicePreview()">
+                    <i class="fa fa-times text-white text-xl"></i>
+                </button>
+            </div>
+            <div class="bg-white rounded-lg shadow-2xl p-4">
+                <img src="https://neeko-copilot.bytedance.net/api/text2image?prompt=Chinese%20VAT%20invoice%20document%20receipt%20official%20paper%20clean%20background&image_size=landscape_16_9" alt="发票大图" class="w-full max-h-[70vh] object-contain rounded">
+            </div>
+            <p class="text-center text-white/70 text-sm mt-3">点击空白处或关闭按钮退出预览</p>
+        </div>
+    </div>
+
+    <div id="rejectDetailModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden">
+            <div class="flex items-center justify-between px-6 py-4 border-b">
+                <h3 class="text-lg font-semibold text-gray-800">驳回详情</h3>
+                <button onclick="closeRejectDetailModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">申请单号</label>
+                    <span id="rejectDetailApplyId" class="text-sm text-primary font-medium"></span>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">申请类型</label>
+                    <span id="rejectDetailType" class="text-sm text-gray-700"></span>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">驳回原因</label>
+                    <div class="p-3 bg-red-50 border border-red-200 rounded-lg">
+                        <p id="rejectDetailReason" class="text-sm text-red-800"></p>
+                    </div>
+                </div>
+                <div class="flex justify-end">
+                    <button onclick="closeRejectDetailModal()" class="px-4 py-2 text-sm text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                        关闭
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
